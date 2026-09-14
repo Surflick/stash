@@ -797,6 +797,7 @@ a {
 .list-toolbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 2px 8px 10px;
   min-height: 30px;
@@ -804,6 +805,14 @@ a {
   top: 0;
   z-index: 2;
   background: var(--elev);
+}
+
+.toolbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
 }
 
 .check-all {
@@ -818,11 +827,15 @@ a {
 
 .check-all input,
 .item-check input {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   margin: 0;
   accent-color: var(--red);
   cursor: pointer;
+}
+
+.item-check input {
+  pointer-events: none;
 }
 
 .sel-count {

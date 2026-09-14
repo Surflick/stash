@@ -91,10 +91,12 @@
     queueSelectAll: $("queue-select-all"),
     queueSelCount: $("queue-sel-count"),
     queueDeleteSelected: $("queue-delete-selected"),
+    queueDeleteAll: $("queue-delete-all"),
     libraryToolbar: $("library-toolbar"),
     librarySelectAll: $("library-select-all"),
     librarySelCount: $("library-sel-count"),
     libraryDeleteSelected: $("library-delete-selected"),
+    libraryDeleteAll: $("library-delete-all"),
     folderBtn: $("folder-btn"),
     healthBtn: $("health-btn"),
     healthDot: $("health-dot"),
@@ -665,9 +667,9 @@
   }
 
   function selectBox(id, selected) {
-    return `<label class="item-check"><input type="checkbox" data-action="select" data-id="${esc(id)}" ${
+    return `<label class="item-check" data-action="select" data-id="${esc(id)}"><input type="checkbox" ${
       selected ? "checked" : ""
-    } aria-label="Select"></label>`;
+    } tabindex="-1" aria-label="Select"></label>`;
   }
 
   function actionButtons(job) {
@@ -728,8 +730,9 @@
     }
     setText(count, n ? `${n} selected` : "");
     if (del) {
+      show(del, n > 0);
       del.disabled = n === 0;
-      del.textContent = n > 1 ? `Delete ${n}` : "Delete";
+      del.textContent = n === 1 ? "Delete selected" : `Delete ${n}`;
     }
   }
 
@@ -1010,6 +1013,16 @@
     return window.confirm(msg);
   }
 
+  function confirmClearQueue(n, fileCount) {
+    if (fileCount) return confirmDeleteFiles(fileCount);
+    if (n <= 0) return true;
+    const msg =
+      n === 1
+        ? "Remove this item from the queue?"
+        : `Clear ${n} items from the queue?`;
+    return window.confirm(msg);
+  }
+
   function dropJob(id) {
     if (!id) return;
     state.jobs.delete(id);
@@ -1074,14 +1087,16 @@
     }
   }
 
-  async function deleteSelectedJobs() {
-    const ids = queueIdsInOrder().filter((id) => state.selectedQueue.has(id));
-    if (!ids.length) return;
-    const fileCount = ids.filter((id) => {
+  function queueFileCount(ids) {
+    return ids.filter((id) => {
       const job = state.jobs.get(id);
       return job && job.status === "done" && job.path;
     }).length;
-    if (fileCount && !confirmDeleteFiles(fileCount)) return;
+  }
+
+  async function deleteJobsByIds(ids) {
+    if (!ids.length) return;
+    const fileCount = queueFileCount(ids);
     const tmp = ids.filter((id) => String(id).startsWith("tmp-"));
     const real = ids.filter((id) => !String(id).startsWith("tmp-"));
     const paths = [];
@@ -1114,10 +1129,22 @@
     announce(fileCount ? "Deleted" : "Removed from queue");
   }
 
-  async function deleteSelectedLibrary() {
-    const ids = libraryIdsInOrder().filter((id) => state.selectedLibrary.has(id));
+  async function deleteSelectedJobs() {
+    const ids = queueIdsInOrder().filter((id) => state.selectedQueue.has(id));
     if (!ids.length) return;
-    if (!confirmDeleteFiles(ids.length)) return;
+    if (!confirmClearQueue(ids.length, queueFileCount(ids))) return;
+    await deleteJobsByIds(ids);
+  }
+
+  async function deleteAllJobs() {
+    const ids = queueIdsInOrder();
+    if (!ids.length) return;
+    if (!confirmClearQueue(ids.length, queueFileCount(ids))) return;
+    await deleteJobsByIds(ids);
+  }
+
+  async function deleteLibraryByIds(ids) {
+    if (!ids.length) return;
     const paths = state.library.filter((it) => ids.includes(it.id)).map((it) => it.path);
     try {
       const data = await api("/api/library/delete", { method: "POST", body: { ids } });
@@ -1130,6 +1157,20 @@
     } catch (err) {
       announce(err.message || "Couldn’t delete");
     }
+  }
+
+  async function deleteSelectedLibrary() {
+    const ids = libraryIdsInOrder().filter((id) => state.selectedLibrary.has(id));
+    if (!ids.length) return;
+    if (!confirmDeleteFiles(ids.length)) return;
+    await deleteLibraryByIds(ids);
+  }
+
+  async function deleteAllLibrary() {
+    const ids = libraryIdsInOrder();
+    if (!ids.length) return;
+    if (!confirmDeleteFiles(ids.length)) return;
+    await deleteLibraryByIds(ids);
   }
 
   function retryJob(id) {
@@ -1428,6 +1469,8 @@
   });
   els.queueDeleteSelected.addEventListener("click", () => deleteSelectedJobs());
   els.libraryDeleteSelected.addEventListener("click", () => deleteSelectedLibrary());
+  els.queueDeleteAll.addEventListener("click", () => deleteAllJobs());
+  els.libraryDeleteAll.addEventListener("click", () => deleteAllLibrary());
 
   els.folderBtn.addEventListener("click", () => {
     closeHealthPop();
@@ -1508,7 +1551,13 @@
     loadJobs();
     loadLibrary();
     connectSSE();
-    const q = new URLSearchParams(location.search).get("url");
+    const params = new URLSearchParams(location.search);
+    const tabQ = params.get("tab");
+    if (tabQ === "library" || tabQ === "queue") {
+      setTab(tabQ);
+      if (tabQ === "library") loadLibrary();
+    }
+    const q = params.get("url");
     if (q && isYouTubeUrl(q)) {
       els.url.value = q.trim();
       syncUrlChrome();

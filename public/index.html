@@ -14,7 +14,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
     />
-    <link rel="stylesheet" href="/styles.css?v=1.3.1" />
+    <link rel="stylesheet" href="/styles.css?v=1.3.2" />
   </head>
   <body>
     <div class="glow" aria-hidden="true"></div>
@@ -243,7 +243,10 @@
               Select all
             </label>
             <span class="sel-count" id="queue-sel-count"></span>
-            <button type="button" class="btn-mini btn-danger" id="queue-delete-selected" disabled>Delete</button>
+            <div class="toolbar-actions">
+              <button type="button" class="btn-mini btn-danger" id="queue-delete-selected" hidden>Delete selected</button>
+              <button type="button" class="btn-mini btn-danger" id="queue-delete-all">Delete all</button>
+            </div>
           </div>
           <p class="empty-line" id="queue-empty">Nothing in the queue.</p>
           <div class="item-list" id="queue-list"></div>
@@ -256,7 +259,10 @@
               Select all
             </label>
             <span class="sel-count" id="library-sel-count"></span>
-            <button type="button" class="btn-mini btn-danger" id="library-delete-selected" disabled>Delete</button>
+            <div class="toolbar-actions">
+              <button type="button" class="btn-mini btn-danger" id="library-delete-selected" hidden>Delete selected</button>
+              <button type="button" class="btn-mini btn-danger" id="library-delete-all">Delete all</button>
+            </div>
           </div>
           <p class="empty-line" id="library-empty">Downloads will land here.</p>
           <div class="item-list" id="library-list"></div>
@@ -301,6 +307,6 @@
       </form>
     </dialog>
 
-    <script src="/app.js?v=1.3.1"></script>
+    <script src="/app.js?v=1.3.2"></script>
   </body>
 </html>

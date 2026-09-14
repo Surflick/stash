@@ -17,21 +17,21 @@ Use this for personal copies of videos you’re allowed to download. Respect You
 </p>
 
 <p align="center">
-  <a href="https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-macOS.zip"><strong>Download for Mac</strong></a>
+  <a href="https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-macOS.zip"><strong>Download for Mac</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-windows.zip"><strong>Download for Windows</strong></a>
+  <a href="https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-windows.zip"><strong>Download for Windows</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Surflick/stash/releases/tag/v1.3.1">Release notes</a>
+  <a href="https://github.com/Surflick/stash/releases/tag/v1.3.2">Release notes</a>
 </p>
 
 ## Download
 
 | | File | Size |
 | --- | --- | --- |
-| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-macOS.zip) | ~234 MB |
-| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-windows.zip) | ~108 MB |
+| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-macOS.zip) | ~234 MB |
+| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-windows.zip) | ~108 MB |
 
-Current release: **[v1.3.1](https://github.com/Surflick/stash/releases/tag/v1.3.1)**
+Current release: **[v1.3.2](https://github.com/Surflick/stash/releases/tag/v1.3.2)**
 
 ## Mac
 
@@ -59,8 +59,8 @@ Files land in your **Downloads** folder.
 - Downloads video (H.264 MP4) or audio (M4A / MP3)
 - Queue with live progress
 - Playlists (this video vs whole list)
-- Library of finished files — open, reveal, or hit × to delete (removes the file). Select several to delete at once
-- Queue — cancel, retry, or hit × to drop a row. Select several to clear them. × on a finished item also removes the file
+- Library of finished files — open, reveal, or hit × to delete (removes the file). Check several and **Delete selected**, or **Delete all**
+- Queue — cancel, retry, or hit × to drop a row. Check several and **Delete selected**, or **Delete all**. × on a finished item also removes the file
 - Nothing phones home. No sign-in. Recipients never need API keys.
 
 ## Developing on this Mac
