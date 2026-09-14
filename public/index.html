@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#09090b" />
+    <meta name="description" content="Stash — YouTube, saved locally." />
+    <title>Stash</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="glow" aria-hidden="true"></div>
+    <div class="sr-only" id="live" aria-live="polite"></div>
+
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="./" aria-label="Stash home">
+          <svg class="mark" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+            <path
+              d="M12 3.25v11.2"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.15"
+              stroke-linecap="round"
+            />
+            <path
+              d="M7.15 10.4 12 15.25l4.85-4.85"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.15"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M5 17.35h14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.15"
+              stroke-linecap="round"
+            />
+            <path
+              d="M6.4 17.35v1.55c0 .9.7 1.6 1.6 1.6h8c.9 0 1.6-.7 1.6-1.6v-1.55"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.15"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span class="wordmark">Stash</span>
+        </a>
+        <div class="topbar-spacer"></div>
+        <button
+          type="button"
+          class="icon-btn"
+          id="folder-btn"
+          aria-label="Save location"
+          aria-haspopup="dialog"
+          aria-controls="settings-dialog"
+        >
+          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+            <path
+              d="M3.25 8.25A1.75 1.75 0 0 1 5 6.5h4.05l1.4 1.85H19a1.75 1.75 0 0 1 1.75 1.75V18A1.75 1.75 0 0 1 19 19.75H5A1.75 1.75 0 0 1 3.25 18V8.25Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <div class="health-wrap">
+          <button
+            type="button"
+            class="health-pill"
+            id="health-btn"
+            aria-expanded="false"
+            aria-controls="health-pop"
+          >
+            <span class="dot" id="health-dot" data-state="unknown"></span>
+            <span class="health-text" id="health-label">Checking</span>
+          </button>
+          <div class="popover" id="health-pop" hidden role="status">
+            <p class="pop-row">
+              <span class="pop-k">yt-dlp</span>
+              <span class="pop-v" id="health-ytdlp">—</span>
+            </p>
+            <p class="pop-row">
+              <span class="pop-k">ffmpeg</span>
+              <span class="pop-v" id="health-ffmpeg">—</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="banner" id="health-banner" hidden>
+      <p>yt-dlp isn’t installed, so Stash can’t fetch videos yet.</p>
+    </div>
+
+    <noscript>
+      <div class="banner">Stash needs JavaScript to run.</div>
+    </noscript>
+
+    <main class="shell layout">
+      <section class="composer" aria-label="Download">
+        <form class="url-form" id="url-form" action="#" autocomplete="off">
+          <div class="url-card" id="url-card">
+            <label class="sr-only" for="url">YouTube link</label>
+            <input
+              id="url"
+              name="url"
+              type="text"
+              inputmode="url"
+              spellcheck="false"
+              autocapitalize="off"
+              autocorrect="off"
+              placeholder="Paste a YouTube link"
+              aria-describedby="url-hint url-error"
+            />
+            <kbd class="kbd" id="paste-hint">⌘V</kbd>
+            <button type="button" class="icon-btn clear-btn" id="clear-btn" hidden aria-label="Clear link">
+              <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+                <path
+                  d="M4 4l8 8M12 4l-8 8"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </button>
+            <button type="submit" class="btn btn-fetch" id="fetch-btn" hidden>
+              <span class="btn-label">Fetch</span>
+              <span class="spinner" hidden aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="tagline" id="tagline">YouTube, saved locally.</p>
+          <p class="field-error" id="url-error" hidden></p>
+          <p class="sr-only" id="url-hint">Paste a youtube.com or youtu.be link, then press Enter to fetch.</p>
+        </form>
+
+        <div id="skeleton" class="card media-card" hidden aria-hidden="true">
+          <div class="thumb-wrap skel"></div>
+          <div class="media-body">
+            <div class="skel skel-title"></div>
+            <div class="skel skel-sub"></div>
+            <div class="skel-chips">
+              <span class="skel skel-chip"></span>
+              <span class="skel skel-chip"></span>
+              <span class="skel skel-chip"></span>
+            </div>
+            <div class="skel skel-cta"></div>
+          </div>
+        </div>
+
+        <article class="card media-card" id="result" hidden>
+          <div class="thumb-wrap">
+            <div class="thumb-fallback" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28">
+                <path
+                  d="M12 3.25v11.2M7.15 10.4 12 15.25l4.85-4.85M5 17.35h14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <img id="result-thumb" alt="" decoding="async" referrerpolicy="no-referrer" />
+            <span class="pill duration-pill" id="result-duration" hidden></span>
+            <span class="pill live-pill" id="result-live" hidden>Live</span>
+            <span class="pill playlist-pill" id="result-playlist-badge" hidden></span>
+          </div>
+          <div class="media-body">
+            <h1 class="result-title" id="result-title"></h1>
+            <p class="result-sub" id="result-sub"></p>
+
+            <div class="scope-row" id="playlist-scope" hidden>
+              <div class="seg" role="group" aria-label="Playlist scope">
+                <button type="button" class="seg-btn" data-scope="video" aria-pressed="true">
+                  This video
+                </button>
+                <button type="button" class="seg-btn" data-scope="playlist" aria-pressed="false">
+                  Whole playlist
+                </button>
+              </div>
+            </div>
+
+            <div class="controls">
+              <div class="seg" role="group" aria-label="Download type" id="kind-seg">
+                <button type="button" class="seg-btn" data-kind="video" aria-pressed="true">Video</button>
+                <button type="button" class="seg-btn" data-kind="audio" aria-pressed="false">Audio</button>
+              </div>
+              <div class="chips" id="format-chips" role="radiogroup" aria-label="Quality"></div>
+            </div>
+
+            <p class="live-note" id="live-note" hidden>Live streams can’t be saved until they end.</p>
+            <p class="format-empty" id="format-empty" hidden></p>
+
+            <button type="button" class="btn btn-primary" id="download-btn" disabled>
+              Download
+            </button>
+          </div>
+        </article>
+      </section>
+
+      <aside class="side" aria-label="Queue and library">
+        <div class="side-tabs" role="tablist" aria-label="Sidebar">
+          <button
+            type="button"
+            class="side-tab"
+            role="tab"
+            id="tab-queue"
+            aria-selected="true"
+            aria-controls="panel-queue"
+          >
+            Queue <span class="count" id="queue-count" hidden></span>
+          </button>
+          <button
+            type="button"
+            class="side-tab"
+            role="tab"
+            id="tab-library"
+            aria-selected="false"
+            aria-controls="panel-library"
+          >
+            Library <span class="count" id="library-count" hidden></span>
+          </button>
+        </div>
+
+        <div class="side-panel" id="panel-queue" role="tabpanel" aria-labelledby="tab-queue">
+          <p class="empty-line" id="queue-empty">Nothing in the queue.</p>
+          <div class="item-list" id="queue-list"></div>
+        </div>
+
+        <div class="side-panel" id="panel-library" role="tabpanel" aria-labelledby="tab-library" hidden>
+          <p class="empty-line" id="library-empty">Downloads will land here.</p>
+          <div class="item-list" id="library-list"></div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="shell foot">
+      <p>For personal copies of videos you’re allowed to download.</p>
+    </footer>
+
+    <dialog class="sheet" id="settings-dialog" aria-labelledby="settings-title">
+      <form class="sheet-form" id="settings-form" action="#">
+        <div class="sheet-head">
+          <h2 id="settings-title">Save location</h2>
+          <button type="button" class="icon-btn" id="settings-close" aria-label="Close">
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+              <path
+                d="M4 4l8 8M12 4l-8 8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <p class="sheet-copy">New files land in this folder.</p>
+        <label class="sr-only" for="output-dir">Folder path</label>
+        <div class="path-row">
+          <input
+            id="output-dir"
+            type="text"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="/Users/you/Downloads"
+          />
+          <button type="button" class="btn" id="save-dir">Save</button>
+        </div>
+        <p class="form-msg" id="settings-msg" hidden></p>
+        <button type="button" class="btn btn-ghost" id="open-folder">Open folder</button>
+      </form>
+    </dialog>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

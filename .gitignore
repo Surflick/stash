@@ -1,0 +1,14 @@
+node_modules/
+downloads/
+data/
+*.log
+.DS_Store
+temp/
+.venv/
+dist/
+vendor/
+giveaway/
+Stash.app/
+.grok/
+chrome-password-import.csv
+AGENTS.md
