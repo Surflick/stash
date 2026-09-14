@@ -1,18 +1,37 @@
+<p align="center">
+  <img src="assets/app-icon-1024.png" width="88" height="88" alt="Stash icon">
+</p>
+
 # Stash
 
-Paste a YouTube link. Hit download. A playable file lands in **Downloads**.
+**Paste a YouTube link. Hit download. A playable MP4 lands in Downloads.**
 
 No account. No cloud. No API keys. It only runs on your machine (`127.0.0.1`).
 
+The zip already includes Node, ffmpeg, and yt-dlp. You do **not** install anything else.
+
 Use this for personal copies of videos you’re allowed to download. Respect YouTube’s terms and the creator’s rights.
 
-The zip already includes Node, ffmpeg, and yt-dlp. Friends do **not** install anything else.
+<p align="center">
+  <img src="assets/stash-x-card.png" alt="Stash — paste a YouTube link, download, file in Downloads" width="800">
+</p>
+
+<p align="center">
+  <a href="https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-macOS.zip"><strong>Download for Mac</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-windows.zip"><strong>Download for Windows</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/Surflick/stash/releases/tag/v1.2.0">Release notes</a>
+</p>
 
 ## Download
 
-- [Stash for Mac](https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-macOS.zip)
-- [Stash for Windows](https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-windows.zip)
-- [Release notes](https://github.com/Surflick/stash/releases/tag/v1.2.0)
+| | File | Size |
+| --- | --- | --- |
+| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-macOS.zip) | ~234 MB |
+| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-windows.zip) | ~108 MB |
+
+Current release: **[v1.2.0](https://github.com/Surflick/stash/releases/tag/v1.2.0)**
 
 ## Mac
 
@@ -36,11 +55,12 @@ Files land in your **Downloads** folder.
 
 ## What it does
 
-- Fetch title, thumbnail, duration, and available qualities
-- Download video (H.264 MP4) or audio (M4A / MP3)
+- Fetches title, thumbnail, duration, and available qualities
+- Downloads video (H.264 MP4) or audio (M4A / MP3)
 - Queue with live progress
 - Playlists (this video vs whole list)
 - Library of finished files — open or reveal in Finder / Explorer
+- Nothing phones home. No sign-in. Recipients never need API keys.
 
 ## Developing on this Mac
 
@@ -57,3 +77,7 @@ Rebuild the giveaway zips:
 ```bash
 ./scripts/package.sh
 ```
+
+## License
+
+[MIT](LICENSE). Bundled Node, ffmpeg, and yt-dlp keep their own licenses (see `THIRD_PARTY.txt` inside the zip).
