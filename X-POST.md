@@ -6,10 +6,12 @@ Giveaway zips (self-contained — people do not install Node, ffmpeg, or yt-dlp)
 
 ```text
 https://github.com/Surflick/stash/releases/latest
-https://github.com/Surflick/stash/releases/tag/v1.3.0
-https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-macOS.zip
-https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-windows.zip
+https://github.com/Surflick/stash/releases/tag/v1.3.1
+https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-macOS.zip
+https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-windows.zip
 ```
+
+The original X post used `v1.2.0`. That URL still works — it serves the same current zip.
 
 Folder apps: unzip, keep everything together, double-click **Open Stash**. Do not ship `data/` or your Chrome CSV.
 
@@ -21,8 +23,8 @@ Folder apps: unzip, keep everything together, double-click **Open Stash**. Do no
 
 1. Create a public repo at [github.com/new](https://github.com/new) — name it `stash` (or similar).
 2. **Releases → Draft a new release**
-   - Tag: `v1.3.0`
-   - Title: `Stash 1.3.0`
+   - Tag: `v1.3.1`
+   - Title: `Stash 1.3.1`
    - Attach `Stash-macOS.zip` and `Stash-windows.zip`
    - Publish
 

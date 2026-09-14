@@ -17,21 +17,21 @@ Use this for personal copies of videos you’re allowed to download. Respect You
 </p>
 
 <p align="center">
-  <a href="https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-macOS.zip"><strong>Download for Mac</strong></a>
+  <a href="https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-macOS.zip"><strong>Download for Mac</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-windows.zip"><strong>Download for Windows</strong></a>
+  <a href="https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-windows.zip"><strong>Download for Windows</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Surflick/stash/releases/tag/v1.3.0">Release notes</a>
+  <a href="https://github.com/Surflick/stash/releases/tag/v1.3.1">Release notes</a>
 </p>
 
 ## Download
 
 | | File | Size |
 | --- | --- | --- |
-| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-macOS.zip) | ~234 MB |
-| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-windows.zip) | ~108 MB |
+| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-macOS.zip) | ~234 MB |
+| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.3.1/Stash-windows.zip) | ~108 MB |
 
-Current release: **[v1.3.0](https://github.com/Surflick/stash/releases/tag/v1.3.0)**
+Current release: **[v1.3.1](https://github.com/Surflick/stash/releases/tag/v1.3.1)**
 
 ## Mac
 
