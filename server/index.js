@@ -14,7 +14,7 @@ const PORT = Number(process.env.PORT) || 47841;
 const HOST = '127.0.0.1';
 const MAX_CONCURRENT = 2;
 const MAX_FINISHED_JOBS = 100;
-const VERSION = '1.3.2';
+const VERSION = '1.3.3';
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
 process.title = 'stash';

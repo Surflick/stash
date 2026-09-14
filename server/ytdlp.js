@@ -5,7 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const YTDLP_MISSING = 'yt-dlp is not installed. Stash will try python3 -m yt_dlp.';
+const YTDLP_MISSING = 'yt-dlp is not installed. Tube Stash will try python3 -m yt_dlp.';
 const PROBE_TIMEOUT_MS = 45_000;
 const VERSION_TIMEOUT_MS = 8_000;
 const MAX_PROBE_STDOUT = 20 * 1024 * 1024;
@@ -554,7 +554,7 @@ function lastMeaningfulError(stderr, fallback = 'Download failed') {
         return 'This video is unavailable.';
       }
       if (/403|Forbidden|unable to download video data/i.test(msg)) {
-        return 'YouTube blocked this stream. Retry — Stash will try a different method.';
+        return 'YouTube blocked this stream. Retry — Tube Stash will try a different method.';
       }
       return msg.replace(/\s*\(caused by[\s\S]*$/, '').trim();
     }

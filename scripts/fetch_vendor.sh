@@ -166,7 +166,7 @@ for plat in "${PLATFORMS[@]}"; do
 done
 
 cat > "$DEST/THIRD_PARTY.txt" << 'EOF'
-Stash ships these tools so you do not have to install anything else.
+Tube Stash ships these tools so you do not have to install anything else.
 
 Node.js
   License: MIT

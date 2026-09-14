@@ -582,11 +582,11 @@
 
     if (!p || state.probing) {
       els.downloadBtn.disabled = true;
-      document.title = "Stash";
+      document.title = "Tube Stash";
       return;
     }
 
-    document.title = `${p.title} — Stash`;
+    document.title = `${p.title} — Tube Stash`;
     setText(els.title, p.title);
     bindThumb(els.thumb, p.thumbnail);
     els.thumb.alt = p.title ? `Thumbnail for ${p.title}` : "";

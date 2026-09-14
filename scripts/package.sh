@@ -1,21 +1,21 @@
 #!/bin/zsh
 # Build self-contained Mac + Windows zips. Recipients unzip and double-click.
-# Does not leave vendor/ in the working copy — your local Stash stays PATH-based.
+# Does not leave vendor/ in the working copy — your local copy stays PATH-based.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 STAGE="$(mktemp -d /tmp/stash-package.XXXXXX)"
-NAME="Stash"
+NAME="Tube Stash"
 OUT_DIR="$ROOT/dist"
-ZIP_MAC="$OUT_DIR/${NAME}-macOS.zip"
-ZIP_WIN="$OUT_DIR/${NAME}-windows.zip"
+ZIP_MAC="$OUT_DIR/Stash-macOS.zip"
+ZIP_WIN="$OUT_DIR/Stash-windows.zip"
 
 cleanup() { rm -rf "$STAGE"; }
 trap cleanup EXIT
 
 chmod +x "$ROOT/scripts/fetch_vendor.sh" "$ROOT/scripts/start.sh" "$ROOT/scripts/build_app.sh"
 
-echo "Rebuilding Stash.app…"
+echo "Rebuilding Tube Stash.app…"
 "$ROOT/scripts/build_app.sh"
 
 copy_app_files() {
@@ -38,10 +38,12 @@ copy_app_files() {
 DEST_MAC="$STAGE/mac/$NAME"
 mkdir -p "$DEST_MAC"
 copy_app_files "$DEST_MAC"
-rsync -a --delete --exclude '.DS_Store' "$ROOT/Stash.app" "$DEST_MAC/"
+rsync -a --delete --exclude '.DS_Store' "$ROOT/Tube Stash.app" "$DEST_MAC/"
+cp "$ROOT/Open Tube Stash.command" "$DEST_MAC/Open Tube Stash.command"
 cp "$ROOT/Open Stash.command" "$DEST_MAC/Open Stash.command"
 cp "$ROOT/Fix macOS warning.command" "$DEST_MAC/Fix macOS warning.command"
 chmod +x \
+  "$DEST_MAC/Open Tube Stash.command" \
   "$DEST_MAC/Open Stash.command" \
   "$DEST_MAC/Fix macOS warning.command" \
   "$DEST_MAC/scripts/start.sh" \
@@ -61,9 +63,10 @@ xattr -cr "$ZIP_MAC" 2>/dev/null || true
 DEST_WIN="$STAGE/win/$NAME"
 mkdir -p "$DEST_WIN"
 copy_app_files "$DEST_WIN"
+cp "$ROOT/Open Tube Stash.bat" "$DEST_WIN/Open Tube Stash.bat"
 cp "$ROOT/Open Stash.bat" "$DEST_WIN/Open Stash.bat"
-rm -rf "$DEST_WIN/Stash.app"
-rm -f "$DEST_WIN/Open Stash.command" "$DEST_WIN/Fix macOS warning.command"
+rm -rf "$DEST_WIN/Tube Stash.app" "$DEST_WIN/Stash.app"
+rm -f "$DEST_WIN/Open Tube Stash.command" "$DEST_WIN/Open Stash.command" "$DEST_WIN/Fix macOS warning.command"
 rm -f "$DEST_WIN/scripts/stash_launcher.c" "$DEST_WIN/scripts/build_app.sh"
 
 echo "Fetching Windows vendor binaries…"

@@ -28,8 +28,8 @@ static void set_path(void) {
   setenv("PATH", path, 1);
 }
 
-/* Stash.app lives next to the project files. Executable is:
- *   <root>/Stash.app/Contents/MacOS/Stash
+/* Tube Stash.app lives next to the project files. Executable is:
+ *   <root>/Tube Stash.app/Contents/MacOS/Stash
  */
 static int project_root(char *out, size_t cap) {
   char exe[PATH_MAX];
@@ -42,7 +42,8 @@ static int project_root(char *out, size_t cap) {
     resolved[sizeof(resolved) - 1] = '\0';
   }
 
-  char *marker = strstr(resolved, "/Stash.app/Contents/MacOS/");
+  char *marker = strstr(resolved, "/Tube Stash.app/Contents/MacOS/");
+  if (!marker) marker = strstr(resolved, "/Stash.app/Contents/MacOS/");
   if (!marker) return -1;
   *marker = '\0';
   if (!resolved[0]) return -1;
@@ -56,7 +57,7 @@ int main(void) {
 
   char root[PATH_MAX];
   if (project_root(root, sizeof(root)) != 0) {
-    fprintf(stderr, "Stash.app must stay inside the Stash folder.\n");
+    fprintf(stderr, "Tube Stash.app must stay inside the Tube Stash folder.\n");
     return 1;
   }
 
@@ -65,7 +66,7 @@ int main(void) {
     return 1;
   }
   if (!is_file(script)) {
-    fprintf(stderr, "Cannot find %s\nKeep Stash.app next to the scripts folder.\n", script);
+    fprintf(stderr, "Cannot find %s\nKeep Tube Stash.app next to the scripts folder.\n", script);
     return 1;
   }
 

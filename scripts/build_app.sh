@@ -2,10 +2,16 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP="$ROOT/Stash.app"
+APP="$ROOT/Tube Stash.app"
 RES="$APP/Contents/Resources"
 MACOS="$APP/Contents/MacOS"
 ICON_SRC="$ROOT/assets/app-icon-1024.png"
+LAUNCHER_BODY='#!/bin/zsh
+cd "$(dirname "$0")"
+export STASH_ROOT="$PWD"
+export PATH="/opt/homebrew/bin:/opt/homebrew/opt/node@22/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+exec "$STASH_ROOT/scripts/start.sh"
+'
 
 echo "Building → $APP"
 mkdir -p "$MACOS" "$RES"
@@ -31,7 +37,7 @@ cat > "$APP/Contents/Info.plist" << 'PLIST'
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleDisplayName</key>
-  <string>Stash</string>
+  <string>Tube Stash</string>
   <key>CFBundleExecutable</key>
   <string>Stash</string>
   <key>CFBundleIconFile</key>
@@ -41,13 +47,13 @@ cat > "$APP/Contents/Info.plist" << 'PLIST'
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>Stash</string>
+  <string>Tube Stash</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>1.2.0</string>
+  <string>1.3.3</string>
   <key>CFBundleVersion</key>
-  <string>1.2.0</string>
+  <string>1.3.3</string>
   <key>LSMinimumSystemVersion</key>
   <string>12.0</string>
   <key>NSHighResolutionCapable</key>
@@ -78,19 +84,21 @@ if [[ -f "$ICON_SRC" ]]; then
 fi
 
 # Board launcher: run start.sh relative to this folder so the zip works
-# on someone else's Mac.
-cat > "$ROOT/Open Stash.command" << 'EOF'
-#!/bin/zsh
-cd "$(dirname "$0")"
-export STASH_ROOT="$PWD"
-export PATH="/opt/homebrew/bin:/opt/homebrew/opt/node@22/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
-exec "$STASH_ROOT/scripts/start.sh"
-EOF
-chmod +x "$ROOT/Open Stash.command" "$ROOT/scripts/start.sh" "$ROOT/scripts/package.sh" 2>/dev/null || chmod +x "$ROOT/Open Stash.command" "$ROOT/scripts/start.sh"
+# on someone else's Mac. Keep the old filename so existing shortcuts still open.
+print -r -- "$LAUNCHER_BODY" > "$ROOT/Open Tube Stash.command"
+print -r -- "$LAUNCHER_BODY" > "$ROOT/Open Stash.command"
+chmod +x "$ROOT/Open Tube Stash.command" "$ROOT/Open Stash.command" "$ROOT/scripts/start.sh" "$ROOT/scripts/package.sh" 2>/dev/null || \
+  chmod +x "$ROOT/Open Tube Stash.command" "$ROOT/Open Stash.command" "$ROOT/scripts/start.sh"
 
 codesign --force --deep -s - "$APP" 2>/dev/null || true
-xattr -cr "$APP" "$ROOT/Open Stash.command" "$ROOT/scripts/start.sh" 2>/dev/null || true
+xattr -cr "$APP" "$ROOT/Open Tube Stash.command" "$ROOT/Open Stash.command" "$ROOT/scripts/start.sh" 2>/dev/null || true
 touch "$APP"
+
+# Drop the old bundle so Finder / the board don't show two apps.
+if [[ -d "$ROOT/Stash.app" ]]; then
+  rm -rf "$ROOT/Stash.app"
+fi
+
 echo "Done."
 echo "App: $APP"
-echo "Launcher: $ROOT/Open Stash.command"
+echo "Launcher: $ROOT/Open Tube Stash.command"

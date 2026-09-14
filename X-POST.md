@@ -1,4 +1,4 @@
-# Give Stash away on X
+# Give Tube Stash away on X
 
 X cannot attach a zip. Host the file, then paste a post with the public link.
 
@@ -6,14 +6,14 @@ Giveaway zips (self-contained — people do not install Node, ffmpeg, or yt-dlp)
 
 ```text
 https://github.com/Surflick/stash/releases/latest
-https://github.com/Surflick/stash/releases/tag/v1.3.2
-https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-macOS.zip
-https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-windows.zip
+https://github.com/Surflick/stash/releases/tag/v1.3.3
+https://github.com/Surflick/stash/releases/download/v1.3.3/Stash-macOS.zip
+https://github.com/Surflick/stash/releases/download/v1.3.3/Stash-windows.zip
 ```
 
 The original X post used `v1.2.0`. That URL still works — it serves the same current zip.
 
-Folder apps: unzip, keep everything together, double-click **Open Stash**. Do not ship `data/` or your Chrome CSV.
+Folder apps: unzip, keep everything together, double-click **Open Tube Stash**. Do not ship `data/` or your Chrome CSV.
 
 ---
 
@@ -23,8 +23,8 @@ Folder apps: unzip, keep everything together, double-click **Open Stash**. Do no
 
 1. Create a public repo at [github.com/new](https://github.com/new) — name it `stash` (or similar).
 2. **Releases → Draft a new release**
-   - Tag: `v1.3.2`
-   - Title: `Stash 1.3.2`
+   - Tag: `v1.3.3`
+   - Title: `Tube Stash 1.3.3`
    - Attach `Stash-macOS.zip` and `Stash-windows.zip`
    - Publish
 
@@ -49,9 +49,9 @@ Attach `assets/stash-x-card.png` as the image.
 ### Recommended (fits 280)
 
 ```text
-I made a tiny app that saves a YouTube video to Downloads.
+I made Tube Stash — a tiny app that saves a YouTube video to Downloads.
 
-Mac or Windows. Unzip, open Stash. Nothing else to install.
+Mac or Windows. Unzip, open Tube Stash. Nothing else to install.
 Right-click Open first time. Keep the folder together.
 
 Allowed content only.
@@ -62,12 +62,12 @@ https://github.com/Surflick/stash/releases/latest
 ### Longer (X Premium)
 
 ```text
-I made a tiny app that saves a personal copy of a YouTube video to Downloads.
+I made Tube Stash — a tiny app that saves a personal copy of a YouTube video to Downloads.
 
 Paste a link. Hit download. File shows up.
 
 Mac + Windows · unzip and open · nothing else to install
-Unsigned: right-click Open Stash the first time. Keep the folder together.
+Unsigned: right-click Open Tube Stash the first time. Keep the folder together.
 
 Personal copies of content you’re allowed to keep — not a pirate tool.
 
@@ -77,7 +77,7 @@ https://github.com/Surflick/stash/releases/latest
 ### Image alt text
 
 ```text
-Dark 16:9 card. Left: KEEP THE FILE. Right: Stash window with a YouTube link, Download button, and a finished mp4 in Downloads.
+Dark 16:9 card. Left: KEEP THE FILE. Right: Tube Stash window with a YouTube link, Download button, and a finished mp4 in Downloads.
 ```
 
 ---

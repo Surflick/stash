@@ -1,5 +1,5 @@
 #!/bin/bash
-# Start Stash's local server and open the UI.
+# Start Tube Stash's local server and open the UI.
 # The node process is double-forked into its own session so a Finder-launched
 # .app can exit without macOS killing the server.
 set -euo pipefail
@@ -8,7 +8,7 @@ export PATH="/opt/homebrew/bin:/opt/homebrew/opt/node@22/bin:/usr/local/bin:/Lib
 ROOT="${STASH_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 PORT="${PORT:-47841}"
 URL="http://127.0.0.1:${PORT}"
-LOGDIR="${HOME}/Library/Logs/Stash"
+LOGDIR="${HOME}/Library/Logs/Tube Stash"
 mkdir -p "$LOGDIR"
 LOG="${LOGDIR}/server.log"
 LAUNCH_LOG="${LOGDIR}/launcher.log"
@@ -33,11 +33,11 @@ log() {
 }
 
 alert() {
-  /usr/bin/osascript -e "display alert \"Stash\" message \"${1}\" as critical" >/dev/null 2>&1 || true
+  /usr/bin/osascript -e "display alert \"Tube Stash\" message \"${1}\" as critical" >/dev/null 2>&1 || true
 }
 
 notify() {
-  /usr/bin/osascript -e "display notification \"${1}\" with title \"Stash\"" >/dev/null 2>&1 || true
+  /usr/bin/osascript -e "display notification \"${1}\" with title \"Tube Stash\"" >/dev/null 2>&1 || true
 }
 
 health() {
@@ -49,7 +49,7 @@ open_ui() {
 }
 
 log "start ROOT=${ROOT}"
-notify "Opening Stash…"
+notify "Opening Tube Stash…"
 
 if [ ! -f "${ROOT}/server/index.js" ]; then
   log "missing server/index.js"
@@ -67,7 +67,7 @@ NODE="$(command -v node)"
 log "node ${NODE} $($NODE -v 2>/dev/null || true)"
 
 if [ ! -d "${ROOT}/node_modules/express" ]; then
-  notify "Installing Stash…"
+  notify "Installing Tube Stash…"
   log "npm install"
   npm install --no-fund --no-audit >>"$LAUNCH_LOG" 2>&1
 fi
@@ -99,9 +99,9 @@ if ! have_ffmpeg || ! have_ytdlp; then
   CHOICE="$(
     /usr/bin/osascript <<'APPLESCRIPT'
 try
-  set theBtn to button returned of (display dialog "Stash needs ffmpeg and yt-dlp once, then it can save videos to Downloads.
+  set theBtn to button returned of (display dialog "Tube Stash needs ffmpeg and yt-dlp once, then it can save videos to Downloads.
 
-Install them now? (Homebrew if you have it, otherwise pip.)" buttons {"Not now", "Install"} default button "Install" with title "Stash")
+Install them now? (Homebrew if you have it, otherwise pip.)" buttons {"Not now", "Install"} default button "Install" with title "Tube Stash")
   return theBtn
 on error
   return "Not now"
@@ -115,7 +115,7 @@ fi
 
 if ! have_ffmpeg || ! have_ytdlp; then
   log "tools still missing"
-  alert "Stash needs ffmpeg and yt-dlp.\\n\\nIn Terminal:\\n\\nbrew install ffmpeg yt-dlp\\n\\nor:\\n\\npython3 -m pip install -U yt-dlp\\nbrew install ffmpeg"
+  alert "Tube Stash needs ffmpeg and yt-dlp.\\n\\nIn Terminal:\\n\\nbrew install ffmpeg yt-dlp\\n\\nor:\\n\\npython3 -m pip install -U yt-dlp\\nbrew install ffmpeg"
 fi
 
 if health; then
@@ -178,5 +178,5 @@ for _ in $(seq 1 80); do
 done
 
 log "timeout — see ${LOG}"
-alert "Stash did not start.\n\nSee log:\n${LOG}"
+alert "Tube Stash did not start.\n\nSee log:\n${LOG}"
 exit 1

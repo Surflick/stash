@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/app-icon-1024.png" width="88" height="88" alt="Stash icon">
+  <img src="assets/app-icon-1024.png" width="88" height="88" alt="Tube Stash icon">
 </p>
 
-# Stash
+# Tube Stash
 
 **Paste a YouTube link. Hit download. A playable MP4 lands in Downloads.**
 
@@ -13,31 +13,31 @@ The zip already includes Node, ffmpeg, and yt-dlp. You do **not** install anythi
 Use this for personal copies of videos you’re allowed to download. Respect YouTube’s terms and the creator’s rights.
 
 <p align="center">
-  <img src="assets/stash-x-card.png" alt="Stash — paste a YouTube link, download, file in Downloads" width="800">
+  <img src="assets/stash-x-card.png" alt="Tube Stash — paste a YouTube link, download, file in Downloads" width="800">
 </p>
 
 <p align="center">
-  <a href="https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-macOS.zip"><strong>Download for Mac</strong></a>
+  <a href="https://github.com/Surflick/stash/releases/download/v1.3.3/Stash-macOS.zip"><strong>Download for Mac</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-windows.zip"><strong>Download for Windows</strong></a>
+  <a href="https://github.com/Surflick/stash/releases/download/v1.3.3/Stash-windows.zip"><strong>Download for Windows</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Surflick/stash/releases/tag/v1.3.2">Release notes</a>
+  <a href="https://github.com/Surflick/stash/releases/tag/v1.3.3">Release notes</a>
 </p>
 
 ## Download
 
 | | File | Size |
 | --- | --- | --- |
-| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-macOS.zip) | ~234 MB |
-| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.3.2/Stash-windows.zip) | ~108 MB |
+| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.3.3/Stash-macOS.zip) | ~234 MB |
+| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.3.3/Stash-windows.zip) | ~108 MB |
 
-Current release: **[v1.3.2](https://github.com/Surflick/stash/releases/tag/v1.3.2)**
+Current release: **[v1.3.3](https://github.com/Surflick/stash/releases/tag/v1.3.3)** — Tube Stash
 
 ## Mac
 
-1. Unzip **Stash-macOS.zip**. Keep the whole **Stash** folder together — don’t drag `Stash.app` out by itself.
-2. Right-click **Stash.app** → **Open** → **Open** (macOS will warn because it isn’t signed by Apple).
-3. Or double-click **Open Stash.command**.
+1. Unzip **Stash-macOS.zip**. Keep the whole **Tube Stash** folder together — don’t drag `Tube Stash.app` out by itself.
+2. Right-click **Tube Stash.app** → **Open** → **Open** (macOS will warn because it isn’t signed by Apple).
+3. Or double-click **Open Tube Stash.command**.
 
 Files land in `~/Downloads` as H.264 MP4 so QuickTime shows the picture, not a black screen with audio.
 
@@ -47,8 +47,8 @@ Right-click the app → Open. Or double-click **Fix macOS warning** in the unzip
 
 ## Windows
 
-1. Unzip **Stash-windows.zip**. Keep the whole **Stash** folder together.
-2. Double-click **Open Stash.bat**.
+1. Unzip **Stash-windows.zip**. Keep the whole **Tube Stash** folder together.
+2. Double-click **Open Tube Stash.bat**.
 3. If SmartScreen warns, click **More info** → **Run anyway**. Leave the black window open while you use it.
 
 Files land in your **Downloads** folder.
