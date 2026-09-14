@@ -20,6 +20,8 @@
   const ACTIVE = new Set(["queued", "downloading", "merging"]);
   const THUMB_FALLBACK =
     '<div class="thumb-fallback" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 3.25v11.2M7.15 10.4 12 15.25l4.85-4.85M5 17.35h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+  const X_ICON =
+    '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
 
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform || "") || navigator.userAgent.includes("Mac");
 
@@ -44,6 +46,9 @@
     sse: null,
     sseOk: false,
     probeAbort: null,
+    selectedQueue: new Set(),
+    selectedLibrary: new Set(),
+    lastClicked: { queue: null, library: null },
   };
 
   const $ = (id) => document.getElementById(id);
@@ -82,6 +87,14 @@
     libraryEmpty: $("library-empty"),
     libraryList: $("library-list"),
     libraryCount: $("library-count"),
+    queueToolbar: $("queue-toolbar"),
+    queueSelectAll: $("queue-select-all"),
+    queueSelCount: $("queue-sel-count"),
+    queueDeleteSelected: $("queue-delete-selected"),
+    libraryToolbar: $("library-toolbar"),
+    librarySelectAll: $("library-select-all"),
+    librarySelCount: $("library-sel-count"),
+    libraryDeleteSelected: $("library-delete-selected"),
     folderBtn: $("folder-btn"),
     healthBtn: $("health-btn"),
     healthDot: $("health-dot"),
@@ -647,36 +660,124 @@
     return [pct, speed, eta ? `ETA ${eta}` : ""].filter(Boolean).join("  ·  ");
   }
 
-  function deleteButton(id) {
-    return `<button type="button" class="btn-mini btn-danger" data-action="delete" data-id="${esc(id)}">Delete</button>`;
+  function xButton(id, extra = "") {
+    return `<button type="button" class="item-x" data-action="delete" data-id="${esc(id)}" ${extra} aria-label="Delete">${X_ICON}</button>`;
+  }
+
+  function selectBox(id, selected) {
+    return `<label class="item-check"><input type="checkbox" data-action="select" data-id="${esc(id)}" ${
+      selected ? "checked" : ""
+    } aria-label="Select"></label>`;
   }
 
   function actionButtons(job) {
     if (ACTIVE.has(job.status)) {
-      return `<button type="button" class="btn-mini btn-danger" data-action="cancel" data-id="${esc(job.id)}">Cancel</button>${deleteButton(job.id)}`;
+      return `<button type="button" class="btn-mini btn-danger" data-action="cancel" data-id="${esc(job.id)}">Cancel</button>`;
     }
     if (job.status === "done" && job.path) {
-      return `<button type="button" class="btn-mini" data-action="play" data-id="${esc(job.id)}">Play</button><button type="button" class="btn-mini" data-action="reveal" data-id="${esc(job.id)}">Finder</button>${deleteButton(job.id)}`;
+      return `<button type="button" class="btn-mini" data-action="play" data-id="${esc(job.id)}">Play</button><button type="button" class="btn-mini" data-action="reveal" data-id="${esc(job.id)}">Finder</button>`;
     }
     if (job.status === "error" || job.status === "cancelled") {
-      return `<button type="button" class="btn-mini" data-action="retry" data-id="${esc(job.id)}">Retry</button>${deleteButton(job.id)}`;
+      return `<button type="button" class="btn-mini" data-action="retry" data-id="${esc(job.id)}">Retry</button>`;
     }
-    return deleteButton(job.id);
+    return "";
+  }
+
+  function sortedJobs() {
+    return [...state.jobs.values()].sort((a, b) => {
+      const aA = ACTIVE.has(a.status) ? 0 : 1;
+      const bA = ACTIVE.has(b.status) ? 0 : 1;
+      if (aA !== bA) return aA - bA;
+      return (b._ts || 0) - (a._ts || 0);
+    });
+  }
+
+  function queueIdsInOrder() {
+    return sortedJobs().map((j) => j.id);
+  }
+
+  function libraryIdsInOrder() {
+    return state.library.map((it) => it.id);
+  }
+
+  function pruneSelectedQueue() {
+    for (const id of [...state.selectedQueue]) {
+      if (!state.jobs.has(id)) state.selectedQueue.delete(id);
+    }
+  }
+
+  function pruneSelectedLibrary() {
+    const ids = new Set(libraryIdsInOrder());
+    for (const id of [...state.selectedLibrary]) {
+      if (!ids.has(id)) state.selectedLibrary.delete(id);
+    }
+  }
+
+  function syncToolbar(kind) {
+    const items = kind === "queue" ? queueIdsInOrder() : libraryIdsInOrder();
+    const selected = kind === "queue" ? state.selectedQueue : state.selectedLibrary;
+    const toolbar = kind === "queue" ? els.queueToolbar : els.libraryToolbar;
+    const all = kind === "queue" ? els.queueSelectAll : els.librarySelectAll;
+    const count = kind === "queue" ? els.queueSelCount : els.librarySelCount;
+    const del = kind === "queue" ? els.queueDeleteSelected : els.libraryDeleteSelected;
+    show(toolbar, items.length > 0);
+    const n = items.filter((id) => selected.has(id)).length;
+    if (all) {
+      all.checked = items.length > 0 && n === items.length;
+      all.indeterminate = n > 0 && n < items.length;
+    }
+    setText(count, n ? `${n} selected` : "");
+    if (del) {
+      del.disabled = n === 0;
+      del.textContent = n > 1 ? `Delete ${n}` : "Delete";
+    }
+  }
+
+  function toggleSelect(list, id, range) {
+    if (!id) return;
+    const ids = list === "queue" ? queueIdsInOrder() : libraryIdsInOrder();
+    const set = list === "queue" ? state.selectedQueue : state.selectedLibrary;
+    const last = state.lastClicked[list];
+    if (range && last && ids.includes(last) && ids.includes(id)) {
+      const a = ids.indexOf(last);
+      const b = ids.indexOf(id);
+      const [lo, hi] = a < b ? [a, b] : [b, a];
+      for (let i = lo; i <= hi; i++) set.add(ids[i]);
+    } else if (set.has(id)) {
+      set.delete(id);
+    } else {
+      set.add(id);
+    }
+    state.lastClicked[list] = id;
+    if (list === "queue") renderQueue();
+    else renderLibrary();
+  }
+
+  function selectAll(list, on) {
+    const ids = list === "queue" ? queueIdsInOrder() : libraryIdsInOrder();
+    const set = list === "queue" ? state.selectedQueue : state.selectedLibrary;
+    set.clear();
+    if (on) ids.forEach((id) => set.add(id));
+    if (list === "queue") renderQueue();
+    else renderLibrary();
   }
 
   function jobTemplate(job) {
     const pct = displayPercent(job);
+    const selected = state.selectedQueue.has(job.id);
     const err = job.status === "error" && job.error ? `<p class="item-error">${esc(job.error)}</p>` : "";
     const thumb = job.thumbnail
       ? `<img src="${esc(job.thumbnail)}" alt="" decoding="async" referrerpolicy="no-referrer" data-empty="false">`
       : `<img alt="" data-empty="true">`;
-    return `<article class="item" data-id="${esc(job.id)}" data-status="${esc(job.status)}">
+    return `<article class="item${selected ? " is-selected" : ""}" data-id="${esc(job.id)}" data-status="${esc(job.status)}">
+      ${selectBox(job.id, selected)}
       <div class="item-thumb">${thumb}${THUMB_FALLBACK}</div>
       <div class="item-body">
         <div class="item-top">
           <h3 class="item-title">${esc(job.title)}</h3>
-          <div class="item-actions">${actionButtons(job)}</div>
+          ${xButton(job.id)}
         </div>
+        <div class="item-actions">${actionButtons(job)}</div>
         <div class="item-meta">
           <span class="item-state">${esc(statusLabel(job))}</span>
           <span class="item-stats">${esc(statsLine(job))}</span>
@@ -696,43 +797,42 @@
   }
 
   function renderQueue() {
-    const jobs = [...state.jobs.values()].sort((a, b) => {
-      const aA = ACTIVE.has(a.status) ? 0 : 1;
-      const bA = ACTIVE.has(b.status) ? 0 : 1;
-      if (aA !== bA) return aA - bA;
-      return (b._ts || 0) - (a._ts || 0);
-    });
+    pruneSelectedQueue();
+    const jobs = sortedJobs();
     const activeN = jobs.filter((j) => ACTIVE.has(j.status)).length;
     show(els.queueEmpty, jobs.length === 0);
     show(els.queueCount, activeN > 0);
     setText(els.queueCount, String(activeN));
     els.queueList.innerHTML = jobs.map(jobTemplate).join("");
     bindListThumbs(els.queueList);
+    syncToolbar("queue");
   }
 
   function renderLibrary() {
+    pruneSelectedLibrary();
     const items = state.library;
     show(els.libraryEmpty, items.length === 0);
     show(els.libraryCount, items.length > 0);
     setText(els.libraryCount, String(items.length));
     els.libraryList.innerHTML = items
       .map((it) => {
+        const selected = state.selectedLibrary.has(it.id);
         const meta = [it.channel, formatBytes(it.size), formatDate(it.date)].filter(Boolean).join(" · ");
         const thumb = it.thumbnail
           ? `<img src="${esc(it.thumbnail)}" alt="" decoding="async" referrerpolicy="no-referrer" data-empty="false">`
           : `<img alt="" data-empty="true">`;
-        const actions = `${
-          it.path
-            ? `<button type="button" class="btn-mini" data-action="open" data-path="${esc(it.path)}">Open</button><button type="button" class="btn-mini" data-action="reveal" data-path="${esc(it.path)}">Finder</button>`
-            : ""
-        }<button type="button" class="btn-mini btn-danger" data-action="delete" data-id="${esc(it.id)}" data-path="${esc(it.path || "")}">Delete</button>`;
-        return `<article class="item" data-id="${esc(it.id)}">
+        const actions = it.path
+          ? `<button type="button" class="btn-mini" data-action="open" data-path="${esc(it.path)}">Open</button><button type="button" class="btn-mini" data-action="reveal" data-path="${esc(it.path)}">Finder</button>`
+          : "";
+        return `<article class="item${selected ? " is-selected" : ""}" data-id="${esc(it.id)}">
+          ${selectBox(it.id, selected)}
           <div class="item-thumb">${thumb}${THUMB_FALLBACK}</div>
           <div class="item-body">
             <div class="item-top">
               <h3 class="item-title">${esc(it.title)}</h3>
-              <div class="item-actions">${actions}</div>
+              ${xButton(it.id, `data-path="${esc(it.path || "")}"`)}
             </div>
+            <div class="item-actions">${actions}</div>
             <div class="item-meta">
               <span class="item-state">${esc(meta)}</span>
             </div>
@@ -741,6 +841,7 @@
       })
       .join("");
     bindListThumbs(els.libraryList);
+    syncToolbar("library");
   }
 
   function setTab(tab) {
@@ -763,6 +864,7 @@
           ACTIVE.has(job.status)
         ) {
           state.jobs.delete(id);
+          state.selectedQueue.delete(id);
           extra._payload = extra._payload || job._payload;
           extra._ts = job._ts;
           break;
@@ -899,21 +1001,45 @@
     }
   }
 
-  function confirmDeleteFile() {
-    return window.confirm("Delete this file from your computer? This can’t be undone.");
+  function confirmDeleteFiles(n) {
+    if (n <= 0) return true;
+    const msg =
+      n === 1
+        ? "Delete this file from your computer? This can’t be undone."
+        : `Delete ${n} files from your computer? This can’t be undone.`;
+    return window.confirm(msg);
   }
 
   function dropJob(id) {
     if (!id) return;
     state.jobs.delete(id);
+    state.selectedQueue.delete(id);
     renderQueue();
+  }
+
+  function forgetLibraryIds(ids, paths) {
+    const gone = new Set(ids);
+    const gonePaths = new Set(paths.filter(Boolean));
+    state.library = state.library.filter((it) => {
+      if (gone.has(it.id) || (it.path && gonePaths.has(it.path))) {
+        state.selectedLibrary.delete(it.id);
+        return false;
+      }
+      return true;
+    });
+    for (const [jobId, job] of [...state.jobs]) {
+      if (gone.has(jobId) || (job.path && gonePaths.has(job.path))) {
+        state.jobs.delete(jobId);
+        state.selectedQueue.delete(jobId);
+      }
+    }
   }
 
   async function deleteJob(id) {
     const job = state.jobs.get(id);
     if (!job) return;
     const deletesFile = job.status === "done" && Boolean(job.path);
-    if (deletesFile && !confirmDeleteFile()) return;
+    if (deletesFile && !confirmDeleteFiles(1)) return;
     if (String(id).startsWith("tmp-")) {
       dropJob(id);
       announce("Removed from queue");
@@ -923,7 +1049,7 @@
       await api(`/api/jobs/${encodeURIComponent(id)}`, { method: "DELETE" });
       dropJob(id);
       if (deletesFile) {
-        state.library = state.library.filter((it) => it.id !== id && it.path !== job.path);
+        forgetLibraryIds([id], [job.path]);
         renderLibrary();
         announce("Deleted");
       } else {
@@ -936,16 +1062,68 @@
 
   async function deleteLibraryItem(id, filePath) {
     if (!id) return;
-    if (!confirmDeleteFile()) return;
+    if (!confirmDeleteFiles(1)) return;
     try {
       await api(`/api/library/${encodeURIComponent(id)}`, { method: "DELETE" });
-      state.library = state.library.filter((it) => it.id !== id && it.path !== filePath);
-      if (id) state.jobs.delete(id);
-      if (filePath) {
-        for (const [jobId, job] of [...state.jobs]) {
-          if (job.path === filePath) state.jobs.delete(jobId);
+      forgetLibraryIds([id], [filePath]);
+      renderLibrary();
+      renderQueue();
+      announce("Deleted");
+    } catch (err) {
+      announce(err.message || "Couldn’t delete");
+    }
+  }
+
+  async function deleteSelectedJobs() {
+    const ids = queueIdsInOrder().filter((id) => state.selectedQueue.has(id));
+    if (!ids.length) return;
+    const fileCount = ids.filter((id) => {
+      const job = state.jobs.get(id);
+      return job && job.status === "done" && job.path;
+    }).length;
+    if (fileCount && !confirmDeleteFiles(fileCount)) return;
+    const tmp = ids.filter((id) => String(id).startsWith("tmp-"));
+    const real = ids.filter((id) => !String(id).startsWith("tmp-"));
+    const paths = [];
+    for (const id of tmp) {
+      const job = state.jobs.get(id);
+      if (job && job.path) paths.push(job.path);
+      state.jobs.delete(id);
+      state.selectedQueue.delete(id);
+    }
+    if (real.length) {
+      try {
+        const data = await api("/api/jobs/delete", { method: "POST", body: { ids: real } });
+        const deleted = new Set((data && data.deleted) || real);
+        for (const id of deleted) {
+          const job = state.jobs.get(id);
+          if (job && job.path) paths.push(job.path);
+          state.jobs.delete(id);
+          state.selectedQueue.delete(id);
         }
+      } catch (err) {
+        announce(err.message || "Couldn’t delete");
+        renderQueue();
+        return;
       }
+    }
+    forgetLibraryIds(ids, paths);
+    state.selectedQueue.clear();
+    renderQueue();
+    renderLibrary();
+    announce(fileCount ? "Deleted" : "Removed from queue");
+  }
+
+  async function deleteSelectedLibrary() {
+    const ids = libraryIdsInOrder().filter((id) => state.selectedLibrary.has(id));
+    if (!ids.length) return;
+    if (!confirmDeleteFiles(ids.length)) return;
+    const paths = state.library.filter((it) => ids.includes(it.id)).map((it) => it.path);
+    try {
+      const data = await api("/api/library/delete", { method: "POST", body: { ids } });
+      const deleted = (data && data.deleted) || ids;
+      forgetLibraryIds(deleted, paths);
+      state.selectedLibrary.clear();
       renderLibrary();
       renderQueue();
       announce("Deleted");
@@ -1214,6 +1392,11 @@
     const btn = e.target.closest("[data-action]");
     if (!btn) return;
     const id = btn.dataset.id;
+    if (btn.dataset.action === "select") {
+      e.preventDefault();
+      toggleSelect("queue", id, e.shiftKey);
+      return;
+    }
     const job = id ? state.jobs.get(id) : null;
     const path = btn.dataset.path || job?.path || "";
     if (btn.dataset.action === "cancel") cancelJob(id);
@@ -1226,11 +1409,25 @@
   els.libraryList.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
     if (!btn) return;
+    if (btn.dataset.action === "select") {
+      e.preventDefault();
+      toggleSelect("library", btn.dataset.id, e.shiftKey);
+      return;
+    }
     const path = btn.dataset.path || "";
     if (btn.dataset.action === "open") openPath(path, false);
     if (btn.dataset.action === "reveal") openPath(path, true);
     if (btn.dataset.action === "delete") deleteLibraryItem(btn.dataset.id, path);
   });
+
+  els.queueSelectAll.addEventListener("change", () => {
+    selectAll("queue", els.queueSelectAll.checked);
+  });
+  els.librarySelectAll.addEventListener("change", () => {
+    selectAll("library", els.librarySelectAll.checked);
+  });
+  els.queueDeleteSelected.addEventListener("click", () => deleteSelectedJobs());
+  els.libraryDeleteSelected.addEventListener("click", () => deleteSelectedLibrary());
 
   els.folderBtn.addEventListener("click", () => {
     closeHealthPop();
@@ -1258,7 +1455,29 @@
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeHealthPop();
+    if (e.key === "Escape") {
+      closeHealthPop();
+      if (state.selectedQueue.size || state.selectedLibrary.size) {
+        state.selectedQueue.clear();
+        state.selectedLibrary.clear();
+        renderQueue();
+        renderLibrary();
+      }
+    }
+    const typing =
+      e.target &&
+      (e.target.tagName === "INPUT" ||
+        e.target.tagName === "TEXTAREA" ||
+        e.target.isContentEditable);
+    if (!typing && (e.key === "Backspace" || e.key === "Delete")) {
+      if (state.tab === "queue" && state.selectedQueue.size) {
+        e.preventDefault();
+        deleteSelectedJobs();
+      } else if (state.tab === "library" && state.selectedLibrary.size) {
+        e.preventDefault();
+        deleteSelectedLibrary();
+      }
+    }
     const meta = e.metaKey || e.ctrlKey;
     if (meta && e.key === "Enter") {
       e.preventDefault();

@@ -59,8 +59,8 @@ Files land in your **Downloads** folder.
 - Downloads video (H.264 MP4) or audio (M4A / MP3)
 - Queue with live progress
 - Playlists (this video vs whole list)
-- Library of finished files — open, reveal, or delete (removes the file)
-- Queue — cancel, retry, or delete a row (delete on a finished item also removes the file)
+- Library of finished files — open, reveal, or hit × to delete (removes the file). Select several to delete at once
+- Queue — cancel, retry, or hit × to drop a row. Select several to clear them. × on a finished item also removes the file
 - Nothing phones home. No sign-in. Recipients never need API keys.
 
 ## Developing on this Mac

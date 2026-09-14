@@ -14,7 +14,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
     />
-    <link rel="stylesheet" href="/styles.css?v=1.3.0" />
+    <link rel="stylesheet" href="/styles.css?v=1.3.1" />
   </head>
   <body>
     <div class="glow" aria-hidden="true"></div>
@@ -237,11 +237,27 @@
         </div>
 
         <div class="side-panel" id="panel-queue" role="tabpanel" aria-labelledby="tab-queue">
+          <div class="list-toolbar" id="queue-toolbar" hidden>
+            <label class="check-all">
+              <input type="checkbox" id="queue-select-all" />
+              Select all
+            </label>
+            <span class="sel-count" id="queue-sel-count"></span>
+            <button type="button" class="btn-mini btn-danger" id="queue-delete-selected" disabled>Delete</button>
+          </div>
           <p class="empty-line" id="queue-empty">Nothing in the queue.</p>
           <div class="item-list" id="queue-list"></div>
         </div>
 
         <div class="side-panel" id="panel-library" role="tabpanel" aria-labelledby="tab-library" hidden>
+          <div class="list-toolbar" id="library-toolbar" hidden>
+            <label class="check-all">
+              <input type="checkbox" id="library-select-all" />
+              Select all
+            </label>
+            <span class="sel-count" id="library-sel-count"></span>
+            <button type="button" class="btn-mini btn-danger" id="library-delete-selected" disabled>Delete</button>
+          </div>
           <p class="empty-line" id="library-empty">Downloads will land here.</p>
           <div class="item-list" id="library-list"></div>
         </div>
@@ -285,6 +301,6 @@
       </form>
     </dialog>
 
-    <script src="/app.js?v=1.3.0"></script>
+    <script src="/app.js?v=1.3.1"></script>
   </body>
 </html>

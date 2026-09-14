@@ -14,7 +14,7 @@ const PORT = Number(process.env.PORT) || 47841;
 const HOST = '127.0.0.1';
 const MAX_CONCURRENT = 2;
 const MAX_FINISHED_JOBS = 100;
-const VERSION = '1.3.0';
+const VERSION = '1.3.1';
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
 process.title = 'stash';
@@ -507,6 +507,43 @@ function discardJob(job) {
   pump();
 }
 
+function normalizeIds(raw) {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const value of raw) {
+    const id = String(value == null ? '' : value).trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(id);
+    if (out.length >= 500) break;
+  }
+  return out;
+}
+
+function deleteJobById(id) {
+  const job = jobs.get(id);
+  if (!job) return { ok: false, missing: true };
+  const outputPath = job.outputPath;
+  const shouldDeleteFile = job.status === 'done' && outputPath;
+  if (shouldDeleteFile) {
+    discardJobsForFile(outputPath, job.id);
+    deleteSavedFile(outputPath);
+  } else {
+    discardJob(job);
+  }
+  return { ok: true, id, deletedFile: Boolean(shouldDeleteFile) };
+}
+
+function deleteLibraryById(id) {
+  const entry = store.getHistoryEntry(id);
+  if (!entry) return { ok: false, missing: true };
+  discardJobsForFile(entry.outputPath, id);
+  if (entry.outputPath) deleteSavedFile(entry.outputPath);
+  else store.removeHistory(id);
+  return { ok: true, id };
+}
+
 app.get('/api/health', async (_req, res) => {
   try {
     const tools = await ytdlp.getTools(true);
@@ -610,22 +647,34 @@ app.post('/api/jobs/:id/cancel', (req, res) => {
   res.json({ ok: true, job: publicJob(job) });
 });
 
+app.post('/api/jobs/delete', (req, res) => {
+  try {
+    const ids = normalizeIds(req.body && req.body.ids);
+    const deleted = [];
+    const failed = [];
+    for (const id of ids) {
+      try {
+        const result = deleteJobById(id);
+        if (result.missing) failed.push({ id, error: 'Job not found' });
+        else deleted.push(id);
+      } catch (err) {
+        failed.push({ id, error: err.message || 'Failed' });
+      }
+    }
+    res.json({ ok: true, deleted, failed });
+  } catch (err) {
+    sendError(res, err, err.status || 500);
+  }
+});
+
 app.delete('/api/jobs/:id', (req, res) => {
   try {
-    const job = jobs.get(req.params.id);
-    if (!job) {
+    const result = deleteJobById(req.params.id);
+    if (result.missing) {
       res.status(404).json({ ok: false, error: 'Job not found' });
       return;
     }
-    const outputPath = job.outputPath;
-    const shouldDeleteFile = job.status === 'done' && outputPath;
-    if (shouldDeleteFile) {
-      discardJobsForFile(outputPath, job.id);
-      deleteSavedFile(outputPath);
-    } else {
-      discardJob(job);
-    }
-    res.json({ ok: true, id: req.params.id, deletedFile: Boolean(shouldDeleteFile) });
+    res.json({ ok: true, id: result.id, deletedFile: Boolean(result.deletedFile) });
   } catch (err) {
     sendError(res, err, err.status || 500);
   }
@@ -703,18 +752,34 @@ app.get('/api/library', (_req, res) => {
   res.json({ items: store.getLibrary() });
 });
 
+app.post('/api/library/delete', (req, res) => {
+  try {
+    const ids = normalizeIds(req.body && req.body.ids);
+    const deleted = [];
+    const failed = [];
+    for (const id of ids) {
+      try {
+        const result = deleteLibraryById(id);
+        if (result.missing) failed.push({ id, error: 'Library item not found' });
+        else deleted.push(id);
+      } catch (err) {
+        failed.push({ id, error: err.message || 'Failed' });
+      }
+    }
+    res.json({ ok: true, deleted, failed });
+  } catch (err) {
+    sendError(res, err, err.status || 500);
+  }
+});
+
 app.delete('/api/library/:id', (req, res) => {
   try {
-    const id = req.params.id;
-    const entry = store.getHistoryEntry(id);
-    if (!entry) {
+    const result = deleteLibraryById(req.params.id);
+    if (result.missing) {
       res.status(404).json({ ok: false, error: 'Library item not found' });
       return;
     }
-    discardJobsForFile(entry.outputPath, id);
-    if (entry.outputPath) deleteSavedFile(entry.outputPath);
-    else store.removeHistory(id);
-    res.json({ ok: true, id });
+    res.json({ ok: true, id: result.id });
   } catch (err) {
     sendError(res, err, err.status || 500);
   }
