@@ -14,7 +14,7 @@ const PORT = Number(process.env.PORT) || 47841;
 const HOST = '127.0.0.1';
 const MAX_CONCURRENT = 2;
 const MAX_FINISHED_JOBS = 100;
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
 process.title = 'stash';
@@ -75,12 +75,11 @@ function sendSse(res, event, data) {
   res.write(`data: ${data == null ? '' : JSON.stringify(data)}\n\n`);
 }
 
-function emitJob(job) {
-  const payload = publicJob(job);
+function emitEvent(event, data) {
   const dead = [];
   for (const client of sseClients) {
     try {
-      sendSse(client, 'job', payload);
+      sendSse(client, event, data);
     } catch {
       dead.push(client);
     }
@@ -88,7 +87,16 @@ function emitJob(job) {
   for (const client of dead) sseClients.delete(client);
 }
 
+function emitJob(job) {
+  emitEvent('job', publicJob(job));
+}
+
+function emitRemoved(id) {
+  emitEvent('removed', { id });
+}
+
 function bump(job, immediate = false) {
+  if (job._removed) return;
   job.updatedAt = nowIso();
   const t = Date.now();
   if (immediate || !job._lastEmit || t - job._lastEmit >= 200) {
@@ -189,6 +197,14 @@ function releaseSlot(job) {
 }
 
 function finishJob(job, status, extra = {}) {
+  if (job._removed) {
+    if (!job._finished) {
+      job._finished = true;
+      releaseSlot(job);
+      pump();
+    }
+    return;
+  }
   if (job._finished) return;
   job._finished = true;
   if (job.killTimer) {
@@ -244,7 +260,7 @@ function pump() {
 }
 
 async function finalizeDownload(job, handle, code) {
-  if (job._finished) return;
+  if (job._finished || job._removed) return;
   const destinations = handle.getDestinations();
   const outputDir = store.getSettings().outputDir;
   let outputPath = ytdlp.pickOutputFile(destinations, outputDir, { kind: job.kind });
@@ -275,6 +291,17 @@ async function finalizeDownload(job, handle, code) {
         finishJob(job, 'error', { error: (err && err.message) || 'Could not write a playable video file.' });
         return;
       }
+    }
+    if (job._removed || job.cancelRequested) {
+      if (job._removed && outputPath) {
+        try {
+          safeUnlink(outputPath);
+        } catch {
+          // ignore leftover cleanup
+        }
+      }
+      finishJob(job, 'cancelled');
+      return;
     }
     if (!job.title) {
       const base = path.basename(outputPath).replace(/\.[^.]+$/, '');
@@ -418,6 +445,68 @@ function cancelRunning(job) {
   }, 2000);
 }
 
+function safeUnlink(filePath) {
+  const target = expandPath(filePath);
+  if (!target) return { ok: true, missing: true };
+  if (!isSafeOpenPath(target)) {
+    const err = new Error('That path is outside the allowed folders.');
+    err.status = 400;
+    throw err;
+  }
+  try {
+    const st = fs.lstatSync(target);
+    if (st.isDirectory()) {
+      const err = new Error('Refusing to delete a folder.');
+      err.status = 400;
+      throw err;
+    }
+    fs.unlinkSync(target);
+    log('deleted file', target);
+    return { ok: true };
+  } catch (err) {
+    if (err && err.code === 'ENOENT') return { ok: true, missing: true };
+    throw err;
+  }
+}
+
+function deleteSavedFile(filePath) {
+  if (!filePath) return { ok: true, missing: true };
+  const result = safeUnlink(filePath);
+  store.removeHistoryByPath(filePath);
+  return result;
+}
+
+function discardJobsForFile(filePath, extraId) {
+  for (const job of [...jobs.values()]) {
+    if ((extraId && job.id === extraId) || (filePath && job.outputPath === filePath)) {
+      discardJob(job);
+    }
+  }
+}
+
+function discardJob(job) {
+  if (!job) return;
+  job._removed = true;
+  job.cancelRequested = true;
+  if (job.child) {
+    log('delete', job.id, 'pid', job.child.pid);
+    ytdlp.killChild(job.child, 'SIGTERM');
+    if (job.killTimer) clearTimeout(job.killTimer);
+    job.killTimer = setTimeout(() => {
+      if (!job.child) return;
+      ytdlp.killChild(job.child, 'SIGKILL');
+    }, 2000);
+  } else if (!job._finished && job.status !== 'queued' && job.status !== 'done' && job.status !== 'error' && job.status !== 'cancelled') {
+    releaseSlot(job);
+    job._finished = true;
+  }
+  if (jobs.has(job.id)) {
+    jobs.delete(job.id);
+    emitRemoved(job.id);
+  }
+  pump();
+}
+
 app.get('/api/health', async (_req, res) => {
   try {
     const tools = await ytdlp.getTools(true);
@@ -521,6 +610,27 @@ app.post('/api/jobs/:id/cancel', (req, res) => {
   res.json({ ok: true, job: publicJob(job) });
 });
 
+app.delete('/api/jobs/:id', (req, res) => {
+  try {
+    const job = jobs.get(req.params.id);
+    if (!job) {
+      res.status(404).json({ ok: false, error: 'Job not found' });
+      return;
+    }
+    const outputPath = job.outputPath;
+    const shouldDeleteFile = job.status === 'done' && outputPath;
+    if (shouldDeleteFile) {
+      discardJobsForFile(outputPath, job.id);
+      deleteSavedFile(outputPath);
+    } else {
+      discardJob(job);
+    }
+    res.json({ ok: true, id: req.params.id, deletedFile: Boolean(shouldDeleteFile) });
+  } catch (err) {
+    sendError(res, err, err.status || 500);
+  }
+});
+
 app.get('/api/events', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
@@ -591,6 +701,23 @@ app.post('/api/open-folder', async (_req, res) => {
 
 app.get('/api/library', (_req, res) => {
   res.json({ items: store.getLibrary() });
+});
+
+app.delete('/api/library/:id', (req, res) => {
+  try {
+    const id = req.params.id;
+    const entry = store.getHistoryEntry(id);
+    if (!entry) {
+      res.status(404).json({ ok: false, error: 'Library item not found' });
+      return;
+    }
+    discardJobsForFile(entry.outputPath, id);
+    if (entry.outputPath) deleteSavedFile(entry.outputPath);
+    else store.removeHistory(id);
+    res.json({ ok: true, id });
+  } catch (err) {
+    sendError(res, err, err.status || 500);
+  }
 });
 
 app.use('/api', (_req, res) => {

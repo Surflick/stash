@@ -5,9 +5,10 @@ X cannot attach a zip. Host the file, then paste a post with the public link.
 Giveaway zips (self-contained — people do not install Node, ffmpeg, or yt-dlp):
 
 ```text
-https://github.com/Surflick/stash/releases/tag/v1.2.0
-https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-macOS.zip
-https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-windows.zip
+https://github.com/Surflick/stash/releases/latest
+https://github.com/Surflick/stash/releases/tag/v1.3.0
+https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-macOS.zip
+https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-windows.zip
 ```
 
 Folder apps: unzip, keep everything together, double-click **Open Stash**. Do not ship `data/` or your Chrome CSV.
@@ -20,14 +21,14 @@ Folder apps: unzip, keep everything together, double-click **Open Stash**. Do no
 
 1. Create a public repo at [github.com/new](https://github.com/new) — name it `stash` (or similar).
 2. **Releases → Draft a new release**
-   - Tag: `v1.2.0`
-   - Title: `Stash 1.2.0`
+   - Tag: `v1.3.0`
+   - Title: `Stash 1.3.0`
    - Attach `Stash-macOS.zip` and `Stash-windows.zip`
    - Publish
 
 Your post link is the **release page**:
 
-`https://github.com/Surflick/stash/releases/tag/v1.2.0`
+`https://github.com/Surflick/stash/releases/latest`
 
 ### Drive / Dropbox / iCloud (faster, no git)
 
@@ -53,7 +54,7 @@ Right-click Open first time. Keep the folder together.
 
 Allowed content only.
 
-https://github.com/Surflick/stash/releases/tag/v1.2.0
+https://github.com/Surflick/stash/releases/latest
 ```
 
 ### Longer (X Premium)
@@ -68,7 +69,7 @@ Unsigned: right-click Open Stash the first time. Keep the folder together.
 
 Personal copies of content you’re allowed to keep — not a pirate tool.
 
-https://github.com/Surflick/stash/releases/tag/v1.2.0
+https://github.com/Surflick/stash/releases/latest
 ```
 
 ### Image alt text

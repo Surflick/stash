@@ -647,17 +647,21 @@
     return [pct, speed, eta ? `ETA ${eta}` : ""].filter(Boolean).join("  ·  ");
   }
 
+  function deleteButton(id) {
+    return `<button type="button" class="btn-mini btn-danger" data-action="delete" data-id="${esc(id)}">Delete</button>`;
+  }
+
   function actionButtons(job) {
     if (ACTIVE.has(job.status)) {
-      return `<button type="button" class="btn-mini btn-danger" data-action="cancel" data-id="${esc(job.id)}">Cancel</button>`;
+      return `<button type="button" class="btn-mini btn-danger" data-action="cancel" data-id="${esc(job.id)}">Cancel</button>${deleteButton(job.id)}`;
     }
     if (job.status === "done" && job.path) {
-      return `<button type="button" class="btn-mini" data-action="play" data-id="${esc(job.id)}">Play</button><button type="button" class="btn-mini" data-action="reveal" data-id="${esc(job.id)}">Finder</button>`;
+      return `<button type="button" class="btn-mini" data-action="play" data-id="${esc(job.id)}">Play</button><button type="button" class="btn-mini" data-action="reveal" data-id="${esc(job.id)}">Finder</button>${deleteButton(job.id)}`;
     }
     if (job.status === "error" || job.status === "cancelled") {
-      return `<button type="button" class="btn-mini" data-action="retry" data-id="${esc(job.id)}">Retry</button>`;
+      return `<button type="button" class="btn-mini" data-action="retry" data-id="${esc(job.id)}">Retry</button>${deleteButton(job.id)}`;
     }
-    return "";
+    return deleteButton(job.id);
   }
 
   function jobTemplate(job) {
@@ -717,10 +721,12 @@
         const thumb = it.thumbnail
           ? `<img src="${esc(it.thumbnail)}" alt="" decoding="async" referrerpolicy="no-referrer" data-empty="false">`
           : `<img alt="" data-empty="true">`;
-        const actions = it.path
-          ? `<button type="button" class="btn-mini" data-action="open" data-path="${esc(it.path)}">Open</button><button type="button" class="btn-mini" data-action="reveal" data-path="${esc(it.path)}">Finder</button>`
-          : "";
-        return `<article class="item">
+        const actions = `${
+          it.path
+            ? `<button type="button" class="btn-mini" data-action="open" data-path="${esc(it.path)}">Open</button><button type="button" class="btn-mini" data-action="reveal" data-path="${esc(it.path)}">Finder</button>`
+            : ""
+        }<button type="button" class="btn-mini btn-danger" data-action="delete" data-id="${esc(it.id)}" data-path="${esc(it.path || "")}">Delete</button>`;
+        return `<article class="item" data-id="${esc(it.id)}">
           <div class="item-thumb">${thumb}${THUMB_FALLBACK}</div>
           <div class="item-body">
             <div class="item-top">
@@ -893,6 +899,61 @@
     }
   }
 
+  function confirmDeleteFile() {
+    return window.confirm("Delete this file from your computer? This can’t be undone.");
+  }
+
+  function dropJob(id) {
+    if (!id) return;
+    state.jobs.delete(id);
+    renderQueue();
+  }
+
+  async function deleteJob(id) {
+    const job = state.jobs.get(id);
+    if (!job) return;
+    const deletesFile = job.status === "done" && Boolean(job.path);
+    if (deletesFile && !confirmDeleteFile()) return;
+    if (String(id).startsWith("tmp-")) {
+      dropJob(id);
+      announce("Removed from queue");
+      return;
+    }
+    try {
+      await api(`/api/jobs/${encodeURIComponent(id)}`, { method: "DELETE" });
+      dropJob(id);
+      if (deletesFile) {
+        state.library = state.library.filter((it) => it.id !== id && it.path !== job.path);
+        renderLibrary();
+        announce("Deleted");
+      } else {
+        announce("Removed from queue");
+      }
+    } catch (err) {
+      announce(err.message || "Couldn’t delete");
+    }
+  }
+
+  async function deleteLibraryItem(id, filePath) {
+    if (!id) return;
+    if (!confirmDeleteFile()) return;
+    try {
+      await api(`/api/library/${encodeURIComponent(id)}`, { method: "DELETE" });
+      state.library = state.library.filter((it) => it.id !== id && it.path !== filePath);
+      if (id) state.jobs.delete(id);
+      if (filePath) {
+        for (const [jobId, job] of [...state.jobs]) {
+          if (job.path === filePath) state.jobs.delete(jobId);
+        }
+      }
+      renderLibrary();
+      renderQueue();
+      announce("Deleted");
+    } catch (err) {
+      announce(err.message || "Couldn’t delete");
+    }
+  }
+
   function retryJob(id) {
     const job = state.jobs.get(id);
     if (!job) return;
@@ -1045,6 +1106,15 @@
         if (ev.data) onSsePayload(ev.data);
       };
       es.addEventListener("job", onJob);
+      es.addEventListener("removed", (ev) => {
+        fails = 0;
+        try {
+          const data = JSON.parse(ev.data || "{}");
+          if (data && data.id) dropJob(String(data.id));
+        } catch {
+          /* ignore malformed event */
+        }
+      });
       es.onerror = () => {
         fails += 1;
         if (fails >= 2) startPoll();
@@ -1148,6 +1218,7 @@
     const path = btn.dataset.path || job?.path || "";
     if (btn.dataset.action === "cancel") cancelJob(id);
     if (btn.dataset.action === "retry") retryJob(id);
+    if (btn.dataset.action === "delete") deleteJob(id);
     if (btn.dataset.action === "play" || btn.dataset.action === "open") openPath(path, false);
     if (btn.dataset.action === "reveal") openPath(path, true);
   });
@@ -1158,6 +1229,7 @@
     const path = btn.dataset.path || "";
     if (btn.dataset.action === "open") openPath(path, false);
     if (btn.dataset.action === "reveal") openPath(path, true);
+    if (btn.dataset.action === "delete") deleteLibraryItem(btn.dataset.id, path);
   });
 
   els.folderBtn.addEventListener("click", () => {

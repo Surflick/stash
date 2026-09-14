@@ -17,21 +17,21 @@ Use this for personal copies of videos you’re allowed to download. Respect You
 </p>
 
 <p align="center">
-  <a href="https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-macOS.zip"><strong>Download for Mac</strong></a>
+  <a href="https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-macOS.zip"><strong>Download for Mac</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-windows.zip"><strong>Download for Windows</strong></a>
+  <a href="https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-windows.zip"><strong>Download for Windows</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://github.com/Surflick/stash/releases/tag/v1.2.0">Release notes</a>
+  <a href="https://github.com/Surflick/stash/releases/tag/v1.3.0">Release notes</a>
 </p>
 
 ## Download
 
 | | File | Size |
 | --- | --- | --- |
-| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-macOS.zip) | ~234 MB |
-| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.2.0/Stash-windows.zip) | ~108 MB |
+| **Mac** (Apple Silicon + Intel) | [Stash-macOS.zip](https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-macOS.zip) | ~234 MB |
+| **Windows** (64-bit) | [Stash-windows.zip](https://github.com/Surflick/stash/releases/download/v1.3.0/Stash-windows.zip) | ~108 MB |
 
-Current release: **[v1.2.0](https://github.com/Surflick/stash/releases/tag/v1.2.0)**
+Current release: **[v1.3.0](https://github.com/Surflick/stash/releases/tag/v1.3.0)**
 
 ## Mac
 
@@ -59,7 +59,8 @@ Files land in your **Downloads** folder.
 - Downloads video (H.264 MP4) or audio (M4A / MP3)
 - Queue with live progress
 - Playlists (this video vs whole list)
-- Library of finished files — open or reveal in Finder / Explorer
+- Library of finished files — open, reveal, or delete (removes the file)
+- Queue — cancel, retry, or delete a row (delete on a finished item also removes the file)
 - Nothing phones home. No sign-in. Recipients never need API keys.
 
 ## Developing on this Mac

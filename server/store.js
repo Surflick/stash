@@ -148,6 +148,29 @@ function addHistory(entry) {
   return row;
 }
 
+function getHistoryEntry(id) {
+  if (id == null || id === '') return null;
+  const key = String(id);
+  return history.find((e) => e && String(e.id) === key) || null;
+}
+
+function removeHistory(id) {
+  const entry = getHistoryEntry(id);
+  if (!entry) return null;
+  history = history.filter((e) => e !== entry && String(e.id) !== String(id));
+  saveHistory();
+  return entry;
+}
+
+function removeHistoryByPath(outputPath) {
+  if (!outputPath) return [];
+  const removed = history.filter((e) => e && e.outputPath === outputPath);
+  if (!removed.length) return [];
+  history = history.filter((e) => !e || e.outputPath !== outputPath);
+  saveHistory();
+  return removed;
+}
+
 function getLibrary() {
   const items = [];
   for (const entry of history) {
@@ -184,7 +207,10 @@ module.exports = {
   getSettings,
   setOutputDir,
   getHistory,
+  getHistoryEntry,
   addHistory,
+  removeHistory,
+  removeHistoryByPath,
   getLibrary,
   ensureDir,
 };
